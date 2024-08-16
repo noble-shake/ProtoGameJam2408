@@ -48,15 +48,23 @@ public class WorkStation : MonoBehaviour, IDropHandler, IBeginDragHandler, IEndD
             if (recipe.Count < 3)
             {
                 recipe.Add(go.workID);
+                CurrentMenu = MixRecipe((enumBasicWork)System.Enum.Parse(typeof(enumBasicWork), System.Enum.GetName(typeof(enumBasicWork), go.workID)));
+                
             }
 
             ResultObject.gameObject.SetActive(true);
+            Human.instance.StateSwithcing(PlayerState.ORDER);
         }
     }
 
     private enumWorkResult MixRecipe(enumBasicWork target)
     {
-        if (recipe.Count == 0)
+        int CoffeBean = 0;
+        int Ice = 0;
+        int Powder = 0;
+        int Milk = 0;
+
+        if (recipe.Count == 1)
         {
             switch (target)
             { 
@@ -69,14 +77,65 @@ public class WorkStation : MonoBehaviour, IDropHandler, IBeginDragHandler, IEndD
                 case enumBasicWork.Milk:
                     return enumWorkResult.CoffeBean;
             }
-
-
-
-
-            
         }
 
-        return enumWorkResult.Unknown;
+        for (int idx = 0; idx < recipe.Count; idx++)
+        {
+            switch (recipe[idx])
+            {
+                case 0:
+                    CoffeBean++;
+                    break;
+                case 1:
+                    Ice++;
+                    break;
+                case 2:
+                    Powder++;
+                    break;
+                case 3:
+                    Milk++;
+                    break;
+            }
+        }
+
+        if (recipe.Count == 3)
+        {
+            if (CoffeBean == 3)
+            {
+                return enumWorkResult.Americano;
+            }
+            else if (CoffeBean == 2 && Ice == 1)
+            {
+                return enumWorkResult.IceAmericano;
+            }
+            else if (Powder == 1 && Ice == 2)
+            {
+                return enumWorkResult.IceTea;
+            }
+            else if (CoffeBean == 1 && Milk == 2)
+            {
+                return enumWorkResult.CafeLatte;
+            }
+            else if (CoffeBean == 1 && Milk == 1 && Ice == 1)
+            {
+                return enumWorkResult.IceCafeLatte;
+            }
+            else
+            {
+                return enumWorkResult.Failed;
+            }
+        }
+        else
+        {
+            if (Powder == 1 && Ice < 1)
+            {
+                return enumWorkResult.Failed;
+            }
+            else
+            {
+                return enumWorkResult.Unknown;
+            }
+        }
     }
 
     // Start is called before the first frame update
@@ -96,10 +155,7 @@ public class WorkStation : MonoBehaviour, IDropHandler, IBeginDragHandler, IEndD
         else if (recipe.Count > 0)
         {
             Result.text = "Result = ";
-            foreach (int idx in recipe)
-            {
-                Result.text += $"_{idx}_";
-            }
+            Result.text += CurrentMenu.ToString();
             ResultObject.gameObject.SetActive(true);
         }
     }
