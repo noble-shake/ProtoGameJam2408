@@ -33,9 +33,20 @@ Proto Game Jam 2024.08
 
   9. 제한 시간이 끝나고, 손님이 모두 나가면 게임이 끝난다.
 
-  10. 스코어가 3,000점 미만이면 BAD 엔딩, 3,000점 이상이면 GOOD 엔딩이 출력된다.
+  10. 스코어가 일정 미만이면 배드 엔딩, 이상이면 굿 엔딩을 출력한다.
 
   11. 결과 창에는 점수, 재화, 방문한 손님, 만든 음료 갯수가 출력된다.
+
+
+### 게임 화면 (PREVIEW)
+
+| 메인 화면 | 게임 설명 | 게임 화면 | 레시피 |
+  |:---:|:---:|:---:|:---:|
+  |<img src="https://github.com/user-attachments/assets/c733c07a-b1b0-41b0-a5e8-64b2397eb57e" width="256" height="495" /> |<img src="https://github.com/user-attachments/assets/04881265-1947-45e6-b1e3-25c9d1c29cbb" width="256" height="495" /> |<img src="https://github.com/user-attachments/assets/68545647-5993-45d4-becd-8717f7005010" width="256" height="495" /> |<img src="https://github.com/user-attachments/assets/f7e64a83-7d8f-4328-b098-49c54c46aa1a" width="256" height="495" />|
+  | **상점 화면** | **플레이 화면** | **배드 엔딩** | **굿 엔딩** | |
+|<img src="https://github.com/user-attachments/assets/7d6cb59c-0f72-4a33-9c37-38604133d519" width="256" height="495" /> | <img src="https://github.com/user-attachments/assets/cf93a136-6264-4d30-9f0c-c0a64b3e7e55" width="256" height="495" /> | <img src="https://github.com/user-attachments/assets/34f48ef3-975a-410b-81ba-28ffc36b080a" width="256" height="495" /> | <img src="https://github.com/user-attachments/assets/ba6159ce-e126-4016-9075-f55d5e50d97d" width="256" height="495" /> | |
+
+
 
 ### 개발자 (DEVELOPER)
 
