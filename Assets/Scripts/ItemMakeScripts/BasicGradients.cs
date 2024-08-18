@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BasicGradients : MonoBehaviour
 {
-    [SerializeField] enumBasicWork gradient;
+    [SerializeField] public enumBasicWork gradient;
     [SerializeField] SpriteRenderer FrontImage;
     [SerializeField] SpriteRenderer BackgroundImage;
     [SerializeField] bool mouseClick;
@@ -16,7 +16,7 @@ public class BasicGradients : MonoBehaviour
     private void Start()
     {
         FrontImageColl = FrontImage.GetComponent<BoxCollider2D>();
-        FrontImage.GetComponent<Gradients>().GradientType = gradient;
+        // FrontImage.GetComponent<Gradients>().GradientType = gradient;
     }
 
 
@@ -49,9 +49,14 @@ public class BasicGradients : MonoBehaviour
         FrontImageColl.enabled = true;
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         MouseDragCheck();
+    }
+
+    private void Update()
+    {
+        
     }
 
     //private void OnMouseDrag()

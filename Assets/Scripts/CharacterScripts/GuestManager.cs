@@ -3,26 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public enum enumMenu
-{
-    Americano,
-    IceAmericano,
-    IceTea,
-    CafeLatte,
-    IceCafeLatte,
-}
-
-
 public class GuestManager : MonoBehaviour
 {
     public static GuestManager instance;
-    int poolingIndex = 50;
+    int poolingIndex = 24;
 
     [SerializeField] Door EntraceDoor;
     [SerializeField] Door ExitDoor;
     [SerializeField] public GameObject StartPoint;
     [SerializeField] public GameObject EndPoint;
     [SerializeField] public GameObject EntracePoint;
+    [SerializeField] public GameObject ExitDoorPoint;
     [SerializeField] public GameObject ExitPoint;
 
     [SerializeField] Transform GuestGroup;
@@ -65,6 +56,11 @@ public class GuestManager : MonoBehaviour
         }
     }
 
+    public void OpenExitDoor()
+    {
+        ExitDoor.OpenAnim();
+    }
+
     public void SpawnGuest()
     {
 
@@ -89,7 +85,7 @@ public class GuestManager : MonoBehaviour
                 Penguine go = Pool[idx];
                 go.gameObject.SetActive(true);
                 go.gameObject.transform.position = EntracePoint.transform.position;
-                go.menu = (enumMenu)Random.Range(0, 5);
+                go.menu = (StorageItem)Random.Range(0, 5);
                 go.queOrder = OrderWaitingGuests.Count;
                 OrderWaitingGuests.Add(go);
                 go.currentState = GuestState.InOrder;
@@ -108,10 +104,13 @@ public class GuestManager : MonoBehaviour
         }
     }
 
-
-    // Update is called once per frame
-    void Update()
+    public bool PenguineEmptyCheck()
     {
-        SpawnGuest();
+        foreach (Penguine go in Pool)
+        {
+            if (go.gameObject.activeSelf) return false;
+        }
+
+        return true;
     }
 }

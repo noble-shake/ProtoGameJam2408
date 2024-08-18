@@ -20,6 +20,8 @@ public class CookingStation : MonoBehaviour
 
     private void OnMouseDown()
     {
+        if (juiceObject.gameObject.activeSelf == false) return;
+
         mouseClick = true;
         juiceObject.transform.SetParent(null);
         juiceObject.transform.SetAsLastSibling();
@@ -29,6 +31,29 @@ public class CookingStation : MonoBehaviour
     {
         if (Input.GetMouseButtonUp(0))
         {
+            if (IncomeGradient != null)
+            {
+                if (recipe.Count < 3)
+                {
+                    if (juiceObject.gameObject.activeSelf == false)
+                    {
+                        juiceObject.gameObject.SetActive(true);
+                    }
+                    recipe.Add((int)IncomeGradient.GradientType);
+                    CurrentMenu = MixRecipe((enumBasicWork)System.Enum.Parse(typeof(enumBasicWork), System.Enum.GetName(typeof(enumBasicWork), (int)IncomeGradient.GradientType)));
+                    juiceObject.menuType = CurrentMenu;
+                    Sprite item_image = GameManager.instance.getImage((dynamicSprites)System.Enum.Parse(typeof(dynamicSprites), CurrentMenu.ToString()));
+                    juiceObject.setSprite(item_image);
+                    // juiceObject.sprite = 
+                    GameManager.instance.JuiceCounting();
+
+                }
+
+                juiceObject.gameObject.SetActive(true);
+                Human.instance.StateSwithcing(PlayerState.COOK);
+
+                IncomeGradient = null;
+            }
             mouseClick = false;
             juiceObject.transform.SetParent(transform);
             juiceObject.transform.SetAsLastSibling();
@@ -85,24 +110,6 @@ public class CookingStation : MonoBehaviour
         recipe.Clear();
     }
 
-
-    private void OnMouseUp()
-    {
-        if (IncomeGradient == null) return;
-
-        if (recipe.Count < 3)
-        {
-            recipe.Add((int)IncomeGradient.GradientType);
-            CurrentMenu = MixRecipe((enumBasicWork)System.Enum.Parse(typeof(enumBasicWork), System.Enum.GetName(typeof(enumBasicWork), (int)IncomeGradient.GradientType)));
-
-        }
-
-        juiceObject.gameObject.SetActive(true);
-        Human.instance.StateSwithcing(PlayerState.ORDER);
-
-        IncomeGradient = null;
-    }
-
     private enumWorkResult MixRecipe(enumBasicWork target)
     {
         int CoffeBean = 0;
@@ -114,14 +121,14 @@ public class CookingStation : MonoBehaviour
         {
             switch (target)
             {
-                case enumBasicWork.CoffeBean:
-                    return enumWorkResult.CoffeBean;
-                case enumBasicWork.Ice:
-                    return enumWorkResult.CoffeBean;
-                case enumBasicWork.Powder:
-                    return enumWorkResult.CoffeBean;
-                case enumBasicWork.Milk:
-                    return enumWorkResult.CoffeBean;
+                case enumBasicWork.coffeebean:
+                    return enumWorkResult.coffeebean;
+                case enumBasicWork.ice:
+                    return enumWorkResult.ice;
+                case enumBasicWork.poweder:
+                    return enumWorkResult.poweder;
+                case enumBasicWork.milk:
+                    return enumWorkResult.milk;
             }
         }
 
@@ -148,39 +155,48 @@ public class CookingStation : MonoBehaviour
         {
             if (CoffeBean == 3)
             {
-                return enumWorkResult.Americano;
+                return enumWorkResult.hot_ame;
             }
             else if (CoffeBean == 2 && Ice == 1)
             {
-                return enumWorkResult.IceAmericano;
+                return enumWorkResult.ice_ame;
             }
             else if (Powder == 1 && Ice == 2)
             {
-                return enumWorkResult.IceTea;
+                return enumWorkResult.ice_tea;
             }
             else if (CoffeBean == 1 && Milk == 2)
             {
-                return enumWorkResult.CafeLatte;
+                return enumWorkResult.hot_latte;
             }
             else if (CoffeBean == 1 && Milk == 1 && Ice == 1)
             {
-                return enumWorkResult.IceCafeLatte;
+                return enumWorkResult.ice_latte;
             }
             else
             {
-                return enumWorkResult.Failed;
+                return enumWorkResult.fail;
             }
         }
         else
         {
             if (Powder == 1 && Ice < 1)
             {
-                return enumWorkResult.Failed;
+                return enumWorkResult.fail;
             }
             else
             {
-                return enumWorkResult.Unknown;
+                return enumWorkResult.unknown;
             }
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision != null && collision.gameObject.CompareTag("Gradient"))
+        {
+            Debug.Log("Gradient Trigger");
+            IncomeGradient = collision.GetComponent<Gradients>();
         }
     }
 
@@ -189,6 +205,14 @@ public class CookingStation : MonoBehaviour
         if (collision != null && collision.gameObject.CompareTag("Gradient"))
         {
             IncomeGradient = collision.GetComponent<Gradients>();
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision != null && collision.gameObject.CompareTag("Gradient"))
+        {
+            IncomeGradient = null;
         }
     }
 

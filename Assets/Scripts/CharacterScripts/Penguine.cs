@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,14 +16,13 @@ public enum GuestState
     Drink,
 }
 
-
 public class Penguine : MonoBehaviour
 {
     int guestID;
     public int queOrder;
 
     public GuestState currentState;
-    enumMenu WantMenu;
+    [SerializeField] StorageItem WantMenu;
 
     float currentWait;
     [SerializeField] float waitTime;
@@ -29,16 +30,30 @@ public class Penguine : MonoBehaviour
     float currentDrinkTime;
     [SerializeField] float drinkTime;
 
+    int EntryNumber;
     Entry AllocatedEntry;
 
     [SerializeField] float speed;
 
+    [SerializeField] Transform CharSpr;
     [SerializeField] GameObject emojiObject;
     [SerializeField] Image emojiBG;
     [SerializeField] Image emojiIcon;
+    [SerializeField] Image headImage;
 
     public int identify { get { return guestID; } set { guestID = value; } }
-    public enumMenu menu {get {return WantMenu;} set { WantMenu = value; } }
+    public StorageItem menu {get {return WantMenu;} set { WantMenu = value; } }
+
+    private void OnEnable()
+    {
+        if(headImage.gameObject.activeSelf) headImage.gameObject.SetActive(false);
+    }
+
+    private void OnDisable()
+    {
+        emojiBG.fillAmount = 0;
+        emojiObject.gameObject.SetActive(false);
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -64,13 +79,12 @@ public class Penguine : MonoBehaviour
                 LineMove();
                 break;
             case GuestState.Wait:
-
                 WaitCheck();
                 break;
             case GuestState.Entry:
-                // Path Going
                 break;
             case GuestState.Drink:
+                DrinkCheck();
                 break;
 
         }
@@ -79,7 +93,7 @@ public class Penguine : MonoBehaviour
     public void LineMove()
     {
 
-        Vector2 targetVec = GuestManager.instance.StartPoint.transform.position + new Vector3(queOrder * 0.8f, 0f, 0f);
+        Vector2 targetVec = GuestManager.instance.StartPoint.transform.position + new Vector3(queOrder * 0.9f, 0f, 0f);
 
         if (Vector2.Distance(transform.position, targetVec) < 0.005f)
         {
@@ -87,13 +101,10 @@ public class Penguine : MonoBehaviour
             {
                 currentState = GuestState.Wait;
                 emojiObject.gameObject.SetActive(true);
+                emojiIcon.sprite = GameManager.instance.getImage((dynamicSprites)System.Enum.Parse(typeof(dynamicSprites), WantMenu.ToString()));
+                GameManager.instance.GuestOn = this;
                 return;
             } 
-
-            //if (GuestManager.instance.OrderWaitingGuests.Count < queOrder)
-            //{
-            //    queOrder--;
-            //}
 
             return;
         }
@@ -107,15 +118,21 @@ public class Penguine : MonoBehaviour
         emojiBG.fillAmount += Time.deltaTime / waitTime;
         if (currentWait < 0) 
         {
-            // emoticon. unHappy
-            // AllocatedEntry = GuestManager.instance;
             AllocatedEntry = FindEntryPoint.instance.noEntry;
             currentState = GuestState.EntryExit;
             currentWait = waitTime;
             GuestManager.instance.OrderEnd();
+            GameManager.instance.WaitExit();
             emojiBG.fillAmount = 1f;
+            StartCoroutine(EmojiPop(dynamicSprites.angry));
             ExitCheck();
         }
+    }
+
+    public void WaitReset()
+    {
+        currentWait = waitTime;
+        emojiBG.fillAmount = 0f;
     }
 
     public void DrinkCheck()
@@ -123,10 +140,11 @@ public class Penguine : MonoBehaviour
         currentDrinkTime -= Time.deltaTime;
         if (currentDrinkTime < 0)
         {
-            // emoticon. happy
+            AllocatedEntry.AllocatedTable.gameObject.SetActive(false);
             currentState = GuestState.EntryExit;
             ExitCheck();
             currentDrinkTime = drinkTime;
+            FindEntryPoint.instance.ReturnTable(EntryNumber);
         }
     }
 
@@ -135,34 +153,65 @@ public class Penguine : MonoBehaviour
         StartCoroutine(ExitCoroutine());
     }
 
-    public IEnumerator ExitCoroutine()
+    public bool EntryAllocate()
     {
-        Queue<Vector2> queVector = new Queue<Vector2>();
-        for (int idx = AllocatedEntry.Path.Count -1; idx > 0; idx--)
-        {
-            queVector.Enqueue(AllocatedEntry.Path[idx].transform.position);
-        }
-        queVector.Enqueue(GuestManager.instance.ExitPoint.transform.position);
+        emojiObject.gameObject.SetActive(false);
+        headImage.sprite = GameManager.instance.getImage((dynamicSprites)System.Enum.Parse(typeof(dynamicSprites), WantMenu.ToString()));
+        headImage.gameObject.SetActive(true);
 
-        Vector2 Road = queVector.Dequeue();
-        if (queVector.Count == 0)
-        {
-            while (true)
-            {
-                transform.position = Vector2.MoveTowards(transform.position, Road, Time.deltaTime * speed);
+        EntryNumber = FindEntryPoint.instance.AllocateTable();
 
-                yield return null;
-                if (Vector2.Distance(transform.position, Road) < 0.005f) break;
-            }
+        if (EntryNumber == -1)
+        {
+            StartCoroutine(EmojiPop(dynamicSprites.smile));
+            ExitCheck();
+            return false;
         }
         else
         {
-            while (queVector.Count > 0)
-            {
-                transform.position = Vector2.MoveTowards(transform.position, Road, Time.deltaTime * speed);
+            AllocatedEntry = FindEntryPoint.instance.entries[EntryNumber];
+            StartCoroutine(EntryCoroutine());
+            return true;
+        }
 
-                yield return null;
-                if (Vector2.Distance(transform.position, Road) < 0.005f)
+    }
+
+    public IEnumerator EntryCoroutine()
+    {
+        Queue<Vector2> queVector = new Queue<Vector2>();
+        for (int idx = 0; idx < AllocatedEntry.Path.Count; idx++)
+        { 
+            queVector.Enqueue(AllocatedEntry.Path[idx].transform.position);
+        }
+        queVector.Enqueue(AllocatedEntry.transform.position);
+
+        Vector2 Road = queVector.Dequeue();
+
+        bool flag = false;
+        float sightX = transform.position.x;
+        while (flag == false)
+        {
+            transform.position = Vector2.MoveTowards(transform.position, Road, Time.deltaTime * speed);
+
+            if (sightX < transform.position.x)
+            {
+                CharSpr.transform.localScale = new Vector3(-1f, 1f, 1f);
+            }
+            else if (sightX > transform.position.x)
+            {
+                CharSpr.transform.localScale = new Vector3(1f, 1f, 1f);
+            }
+
+            yield return null;
+            sightX = transform.position.x;
+            if (Vector2.Distance((Vector2)transform.position, Road) < 0.005f)
+            {
+
+                if (queVector.Count == 0)
+                {
+                    flag = true;
+                }
+                else
                 {
                     Road = queVector.Dequeue();
                 }
@@ -170,7 +219,83 @@ public class Penguine : MonoBehaviour
         }
 
         yield return null;
+        currentState = GuestState.Drink;
+        headImage.gameObject.SetActive(false);
+        //Entry Set Drink.
+        AllocatedEntry.AllocatedTable.sprite = GameManager.instance.getImage((dynamicSprites)System.Enum.Parse(typeof(dynamicSprites), WantMenu.ToString()));
+        AllocatedEntry.AllocatedTable.gameObject.SetActive(true);
+        // AllocatedEntry.gameObject.SetActive(true);  
+
+        StartCoroutine(EmojiPop(dynamicSprites.smile));
+    }
+
+    public IEnumerator EmojiPop(dynamicSprites _spr)
+    { 
+        if(!emojiObject.activeSelf) emojiObject.SetActive(true);
+
+
+        emojiIcon.sprite = GameManager.instance.getImage(_spr);
+
+        yield return new WaitForSeconds(1f);
+
+        emojiObject.SetActive(false);
+    }
+
+
+    public IEnumerator ExitCoroutine()
+    {
+        Queue<Vector2> queVector = new Queue<Vector2>();
+        for (int idx = AllocatedEntry.Path.Count-1; idx > 0; idx--)
+        {
+            queVector.Enqueue(AllocatedEntry.Path[idx].transform.position);
+        }
+
+        queVector.Enqueue(GuestManager.instance.ExitDoorPoint.transform.position);
+        int doorEffectCount = queVector.Count;
+        queVector.Enqueue(GuestManager.instance.ExitPoint.transform.position);
+
+        Vector2 Road = queVector.Dequeue();
+
+        bool flag = false;
+
+        float sightX = transform.position.x;
+
+
+        while (flag == false)
+        {
+            transform.position = Vector2.MoveTowards(transform.position, Road, Time.deltaTime * speed);
+
+            if (sightX < transform.position.x)
+            {
+                CharSpr.transform.localScale = new Vector3(-1f, 1f, 1f);
+            }
+            else if (sightX > transform.position.x)
+            {
+                CharSpr.transform.localScale = new Vector3(1f, 1f, 1f);
+            }
+
+            yield return null;
+            sightX = transform.position.x;
+            if (Vector2.Distance((Vector2)transform.position, Road) < 0.005f)
+            {
+                if (queVector.Count == doorEffectCount)
+                {
+                    GuestManager.instance.OpenExitDoor();
+                }
+
+                if (queVector.Count == 0)
+                {
+                    flag = true;
+                }
+                else
+                {
+                    Road = queVector.Dequeue();
+                }
+            }
+        }
+        yield return null;
         currentState = GuestState.Exit;
+        CharSpr.transform.localScale = new Vector3(1f, 1f, 1f);
         gameObject.SetActive(false);
     }
 }

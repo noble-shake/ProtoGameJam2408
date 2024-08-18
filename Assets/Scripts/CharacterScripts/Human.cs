@@ -17,6 +17,8 @@ public class Human : MonoBehaviour
     [SerializeField] Sprite OrderImage;
     [SerializeField] Sprite CookImage;
 
+    public PlayerState playerState { get { return CurrentState; } }
+
     private void Awake()
     {
         if (instance == null)
