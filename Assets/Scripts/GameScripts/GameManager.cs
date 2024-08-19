@@ -110,7 +110,7 @@ public class GameManager : MonoBehaviour
     public float buy3Remain;
     public bool StoreUpgrade;
 
-    bool TutorialCheck;
+    public bool TutorialCheck;
     bool EndCheck;
 
     public Penguine GuestOn { set { curInOrderGuest = value; } }
@@ -142,6 +142,8 @@ public class GameManager : MonoBehaviour
         { 
             Destroy(gameObject);
         }
+
+        TutorialCheck = true;
     }
 
 
@@ -185,6 +187,7 @@ public class GameManager : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (TutorialCheck) return;
 
         GameTime -= Time.fixedDeltaTime;
         TimeSpanning(GameTime);
