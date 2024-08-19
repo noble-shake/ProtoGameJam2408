@@ -31,7 +31,7 @@ public class BasicGradients : MonoBehaviour
 
     private void MouseDragCheck()
     {
-
+        if (GameManager.instance.TutorialCheck) return;
 
         if (Input.GetMouseButtonUp(0))
         {

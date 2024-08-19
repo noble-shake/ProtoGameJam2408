@@ -16,6 +16,8 @@ public class MainScript : MonoBehaviour
     [SerializeField] Vector3 DefaultCamera;
     [SerializeField] Vector3 InfoCamera;
 
+    bool ToInfo;
+
 
     private void Awake()
     {
@@ -29,6 +31,26 @@ public class MainScript : MonoBehaviour
         ExitBtn.onClick.AddListener(OnClickExit);
         BackBtn.onClick.AddListener(OnClickBack);
 
+        Camera.main.transform.position = InfoCamera;
+
+    }
+
+
+    private void Update()
+    {
+
+        if (ToInfo == true)
+        {
+            if (Vector3.Distance(Camera.main.transform.position, InfoCamera) < 0.005f) return;
+
+            Camera.main.transform.position = Vector3.MoveTowards(Camera.main.transform.position, InfoCamera, Time.deltaTime * 5f);
+        }
+        else
+        {
+            if (Vector3.Distance(Camera.main.transform.position, DefaultCamera) < 0.005f) return;
+
+            Camera.main.transform.position = Vector3.MoveTowards(Camera.main.transform.position, DefaultCamera, Time.deltaTime * 5f);
+        }
 
     }
 
@@ -40,11 +62,11 @@ public class MainScript : MonoBehaviour
 
     public void OnClickInfo()
     {
+        ToInfo = true;
         StartBtn.gameObject.SetActive(false);
         InfoBtn.gameObject.SetActive(false);
         ExitBtn.gameObject.SetActive(false);
         BackBtn.gameObject.SetActive(true);
-        Camera.main.transform.position = InfoCamera;
         InfoDisplay.gameObject.SetActive(true);
     }
 
@@ -55,11 +77,11 @@ public class MainScript : MonoBehaviour
 
     public void OnClickBack()
     {
+        ToInfo = false;
         StartBtn.gameObject.SetActive(true);
         InfoBtn.gameObject.SetActive(true);
         ExitBtn.gameObject.SetActive(true);
         BackBtn.gameObject.SetActive(false);
-        Camera.main.transform.position = DefaultCamera;
         InfoDisplay.gameObject.SetActive(false); 
     }
 
