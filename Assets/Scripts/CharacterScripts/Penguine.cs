@@ -278,10 +278,6 @@ public class Penguine : MonoBehaviour
             sightX = transform.position.x;
             if (Vector2.Distance((Vector2)transform.position, Road) < 0.005f)
             {
-                if (queVector.Count == doorEffectCount)
-                {
-                    GuestManager.instance.OpenExitDoor();
-                }
 
                 if (queVector.Count == 0)
                 {
@@ -290,6 +286,7 @@ public class Penguine : MonoBehaviour
                 else
                 {
                     Road = queVector.Dequeue();
+                    if (queVector.Count == 0) GuestManager.instance.OpenExitDoor();
                 }
             }
         }
