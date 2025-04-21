@@ -63,8 +63,7 @@ Proto Game Jam 2024.08
   Contact.
   
   Email : noble_shake@naver.com
-  
-  Twitter : @AlterEgoGab
+
   
 - 그래픽 디자이너 (GRAPHIC) : 밍유
   
