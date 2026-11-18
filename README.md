@@ -5,9 +5,33 @@ Developed Period.
 
 Proto Game Jam 2024.08
 
-### 이 저장소에 대하여
+### 원본 저장소
 
-직접 작성한 코드(`Assets/Scripts/`)와 게임 화면 캡처만 들어 있습니다. 그림·소리·폰트 리소스는 포함하지 않아, 이 저장소만 받아서는 프로젝트를 열어 실행할 수 없습니다.
+이 저장소는 공개용입니다. 에셋을 포함한 전체 프로젝트 원본은 비공개 저장소 `ProtoGameJam2408-Archive`에 따로 보관하고 있습니다.
+
+원본에는 팀원이 그린 그림과 소리·폰트 리소스가 들어 있어 그대로 공개하지 않습니다. 그래서 여기에는 **직접 작성한 코드와 게임 화면 캡처만** 옮겼고, 이 저장소만 받아서는 프로젝트를 열어 실행할 수 없습니다.
+
+### 빌드 다운로드
+
+실행 파일은 이 저장소의 [Releases](https://github.com/noble-shake/ProtoGameJam2408/releases)에 올립니다.
+
+현재는 준비 중이며, 올라오면 Releases 페이지에서 받을 수 있습니다.
+
+### 폴더 구조
+
+```
+ProtoGameJam2408/
+├── Assets/
+│   └── Scripts/              게임 코드 전체
+│       ├── CharacterScripts/ 손님(펭귄·사람)의 입장·주문·퇴장
+│       ├── GameScripts/      게임 진행, 주문, 테이블, 음료 재고
+│       ├── ItemMakeScripts/  재료 조합, 음료, 보관함, 쓰레기통
+│       ├── UI/               레시피, 상점, 결과 화면
+│       └── MainScript.cs, Tutorial.cs, WorkInteraction.cs, WorkObject.cs
+├── docs/                     README에 쓰는 게임 화면 캡처
+├── Packages/manifest.json    사용한 Unity 패키지 목록
+└── ProjectSettings/ProjectVersion.txt   엔진 버전
+```
 
 - 엔진: Unity 2022.3.21f1
 
